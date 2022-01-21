@@ -1,0 +1,44 @@
+version: '3.9'
+services:
+    backend_service_1:
+        build: ./flask_ml
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/code
+        depends_on:
+            - redis_db
+
+    backend_service_2:
+        build: ./flask_fe
+        ports:
+            - "5010:5010"
+        volumes:
+            - .:/code
+        depends_on:
+            - redis_db
+
+    frontend_vue:
+      image: frontend_vue
+      container_name: frontend_vue 
+      build: 
+        context: ./frontend_vue/app
+      ports:
+        - 8080:80
+      depends_on:
+        - "redis_db" 
+        - "backend_service_1"
+        - "backend_service_2"
+      restart: on-failure
+  
+    redis_db:
+      image: "redislabs/redismod"
+      ports:
+        - "6379:6379"
+      entrypoint: >
+        redis-server
+          --loadmodule /usr/lib/redis/modules/rejson.so
+      deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure

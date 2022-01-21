@@ -1,0 +1,4 @@
+flask
+redis
+celery
+flask-cors
